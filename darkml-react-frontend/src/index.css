@@ -1,0 +1,22 @@
+/* src/index.css */
+:root {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: light;
+  background-color: #F9FAFB;
+}
+
+body {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.08), transparent 55%),
+    #F9FAFB;
+  color: #1E293B;
+}
+
+html, body {
+  overflow-x: hidden;
+}
