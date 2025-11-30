@@ -16,8 +16,9 @@ import {
   Chip,
   Divider,
 } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
+import { getCourseById } from '../../data/lmsData';
 
 // Mock data
 const mockStudents = [
@@ -34,7 +35,22 @@ const mockAssessments = [
 
 const GradebookPage: React.FC = () => {
   const { courseId } = useParams();
+  const navigate = useNavigate();
+  const course = React.useMemo(() => getCourseById(courseId), [courseId]);
   const [grades, setGrades] = React.useState<Record<string, string>>({});
+
+  React.useEffect(() => {
+    if (courseId && !course) {
+      navigate('/lms/courses', {
+        replace: true,
+        state: { missingCourseId: courseId },
+      });
+    }
+  }, [course, courseId, navigate]);
+
+  if (!course) {
+    return null;
+  }
 
   const handleChange = (
     studentId: string,
@@ -59,7 +75,7 @@ const GradebookPage: React.FC = () => {
     <>
       <PageHeader
         title="Gradebook"
-        subtitle={`Course ID: ${courseId ?? 'Unknown'}`}
+        subtitle={`${course.name} (${course.code})`}
       />
 
       <Card

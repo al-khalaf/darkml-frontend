@@ -1,6 +1,6 @@
 // src/pages/lms/ClassDetailPage.tsx
 import React from 'react';
-import { useParams, Link as RouterLink } from 'react-router-dom';
+import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom';
 import { alpha } from '@mui/material/styles';
 
 import theme from '../../theme';
@@ -32,10 +32,27 @@ import PageHeader from '../../components/common/PageHeader';
 import BarChartCard from '../../components/charts/BarChartCard';
 import LineChartCard from '../../components/charts/LineChartCard';
 import PieChartCard from '../../components/charts/PieChartCard';
+import { getCourseById, getTeacherName } from '../../data/lmsData';
 
 const ClassDetailPage: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
+  const navigate = useNavigate();
   const [tab, setTab] = React.useState(0);
+
+  const course = React.useMemo(() => getCourseById(courseId), [courseId]);
+
+  React.useEffect(() => {
+    if (courseId && !course) {
+      navigate('/lms/courses', {
+        replace: true,
+        state: { missingCourseId: courseId },
+      });
+    }
+  }, [course, courseId, navigate]);
+
+  if (!course) {
+    return null;
+  }
 
   const mockAnnouncements = [
     { id: 'a1', title: 'Welcome to the course!', date: '2025-11-22' },
@@ -332,8 +349,8 @@ const ClassDetailPage: React.FC = () => {
       }}
     >
       <PageHeader
-        title={`Course ${courseId}`}
-        subtitle="Teacher workspace for announcements, gradebook, attendance, and analytics."
+        title={course.name}
+        subtitle={`${course.code} • ${getTeacherName(course.teacherId)}`}
       />
 
       {/* TABS NAV BAR */}

@@ -13,12 +13,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
-
-const mockCourses = [
-  { id: 'c1', name: 'Algebra I', code: 'ALG-101', division: 'HS' },
-  { id: 'c2', name: 'Biology', code: 'BIO-201', division: 'HS' },
-  { id: 'c3', name: 'World History', code: 'HIS-110', division: 'MS' },
-];
+import { courseCatalog } from '../../data/lmsData';
 
 const divisionLabel: Record<string, string> = {
   HS: 'High School',
@@ -41,7 +36,7 @@ const CoursesPage: React.FC = () => {
       />
 
       <Grid container spacing={3}>
-        {mockCourses.map((course) => (
+        {courseCatalog.map((course) => (
           <Grid item xs={12} md={4} key={course.id}>
             <Card
               variant="outlined"

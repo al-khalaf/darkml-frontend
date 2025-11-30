@@ -12,8 +12,9 @@ import {
   Divider,
   Stack,
 } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
+import { getAssessmentById, getCourseById } from '../../data/lmsData';
 
 // Mock data
 const mockAssessment = {
@@ -30,7 +31,28 @@ const mockAssessment = {
 
 const AssessmentDetailPage: React.FC = () => {
   const { assessmentId } = useParams();
-  const assessment = { ...mockAssessment, id: assessmentId || mockAssessment.id };
+  const navigate = useNavigate();
+  const assessment = React.useMemo(
+    () => getAssessmentById(assessmentId),
+    [assessmentId]
+  );
+  const course = React.useMemo(
+    () => getCourseById(assessment?.courseId),
+    [assessment?.courseId]
+  );
+
+  React.useEffect(() => {
+    if (assessmentId && !assessment) {
+      navigate('/lms/assessments', {
+        replace: true,
+        state: { missingAssessmentId: assessmentId },
+      });
+    }
+  }, [assessment, assessmentId, navigate]);
+
+  if (!assessment) {
+    return null;
+  }
 
   const totalMaxScore = assessment.questions.reduce(
     (sum, q) => sum + q.maxScore,
@@ -41,7 +63,7 @@ const AssessmentDetailPage: React.FC = () => {
     <>
       <PageHeader
         title={`Assessment: ${assessment.title}`}
-        subtitle={`${assessment.course} • Type: ${assessment.type} • Due: ${assessment.dueDate}`}
+        subtitle={`${course?.name ?? 'Unknown course'} • Type: ${assessment.type} • Due: ${assessment.dueDate}`}
       />
 
       <Grid container spacing={3}>
