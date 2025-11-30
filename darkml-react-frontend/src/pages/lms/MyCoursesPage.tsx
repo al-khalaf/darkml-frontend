@@ -13,25 +13,35 @@ import {
 import Grid from '@mui/material/Grid';
 import { Link as RouterLink } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
-
-const mockCourses = [
-  { id: 'c1', name: 'Algebra I', teacher: 'Ms. Smith' },
-  { id: 'c2', name: 'Biology', teacher: 'Dr. Brown' },
-  { id: 'c3', name: 'World History', teacher: 'Mr. Lee' },
-  { id: 'c4', name: 'English Literature', teacher: 'Ms. Johnson' },
-  { id: 'c5', name: 'Physics', teacher: 'Dr. Chen' },
-  { id: 'c6', name: 'Computer Science', teacher: 'Mr. Patel' },
-  { id: 'c7', name: 'Art', teacher: 'Ms. Garcia' },
-  { id: 'c8', name: 'Physical Education', teacher: 'Coach Davis' },
-  { id: 'c9', name: 'Music', teacher: 'Mr. Martinez' },
-  { id: 'c10', name: 'Geography', teacher: 'Ms. Adams' },
-];
+import {
+  courseCatalog,
+  getCourseById,
+  getTeacherName,
+  studentEnrollments,
+} from '../../data/lmsData';
 
 const MyCoursesPage: React.FC = () => {
   const theme = useTheme();
 
   const borderColor = theme.palette.divider;
   const softSuccess = alpha(theme.palette.success.main, 0.18);
+
+  const enrolledCourses = React.useMemo(
+    () =>
+      studentEnrollments
+        .map((enrollment) => {
+          const course = getCourseById(enrollment.courseId);
+          if (!course) return null;
+          return {
+            ...course,
+            teacherName: getTeacherName(course.teacherId),
+          };
+        })
+        .filter(Boolean) as (typeof courseCatalog[number] & {
+        teacherName: string;
+      })[],
+    []
+  );
 
   return (
     <>
@@ -41,7 +51,7 @@ const MyCoursesPage: React.FC = () => {
       />
 
       <Grid container spacing={3}>
-        {mockCourses.map((course, index) => (
+        {enrolledCourses.map((course, index) => (
           <Grid item key={course.id} xs={12} sm={6} md={4} lg={3}>
             <Card
               variant="outlined"
@@ -99,7 +109,7 @@ const MyCoursesPage: React.FC = () => {
                       noWrap
                       sx={{ color: 'text.secondary' }}
                     >
-                      Teacher: {course.teacher}
+                      Teacher: {course.teacherName}
                     </Typography>
                   </Box>
 

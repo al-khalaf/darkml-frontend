@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   Box,
   Card,
@@ -14,6 +14,7 @@ import {
   alpha,
 } from '@mui/material';
 import PageHeader from '../../components/common/PageHeader';
+import { getAssessmentById, getCourseById } from '../../data/lmsData';
 
 interface Question {
   id: string;
@@ -28,10 +29,32 @@ const mockQuestions: Question[] = [
 
 const StudentTakeAssessmentPage: React.FC = () => {
   const { assessmentId } = useParams<{ assessmentId: string }>();
+  const navigate = useNavigate();
+  const assessment = React.useMemo(
+    () => getAssessmentById(assessmentId),
+    [assessmentId]
+  );
+  const course = React.useMemo(
+    () => getCourseById(assessment?.courseId),
+    [assessment?.courseId]
+  );
   const theme = useTheme();
 
   const [answers, setAnswers] = React.useState<Record<string, string>>({});
   const [submitted, setSubmitted] = React.useState(false);
+
+  React.useEffect(() => {
+    if (assessmentId && !assessment) {
+      navigate('/lms/assessments', {
+        replace: true,
+        state: { missingAssessmentId: assessmentId },
+      });
+    }
+  }, [assessment, assessmentId, navigate]);
+
+  if (!assessment) {
+    return null;
+  }
 
   const handleChange = (id: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [id]: value }));
@@ -54,8 +77,8 @@ const StudentTakeAssessmentPage: React.FC = () => {
   return (
     <Box>
       <PageHeader
-        title={`Assessment ${assessmentId ?? ''}`}
-        subtitle="Answer the questions below. Your responses are saved locally until submission."
+        title={assessment.title}
+        subtitle={`${course?.name ?? 'Unknown course'} • Due ${assessment.dueDate}`}
       />
 
       <Card variant="outlined">

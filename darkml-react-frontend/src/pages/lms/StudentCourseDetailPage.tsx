@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, Link as RouterLink } from 'react-router-dom';
+import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   Box,
   Tabs,
@@ -18,13 +18,28 @@ import {
   alpha,
 } from '@mui/material';
 import PageHeader from '../../components/common/PageHeader';
+import { getCourseById, getTeacherName } from '../../data/lmsData';
 
 const StudentCourseDetailPage: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
+  const navigate = useNavigate();
   const [tab, setTab] = React.useState(0);
   const theme = useTheme();
 
-  const courseName = `Course ${courseId || ''}`;
+  const course = React.useMemo(() => getCourseById(courseId), [courseId]);
+
+  React.useEffect(() => {
+    if (courseId && !course) {
+      navigate('/lms/my-courses', {
+        replace: true,
+        state: { missingCourseId: courseId },
+      });
+    }
+  }, [course, courseId, navigate]);
+
+  if (!course) {
+    return null;
+  }
 
   const announcements = [
     { id: 'an1', title: 'Welcome to the course', date: '2025-11-20' },
@@ -67,8 +82,8 @@ const StudentCourseDetailPage: React.FC = () => {
   return (
     <Box>
       <PageHeader
-        title={courseName}
-        subtitle="Student-facing view of this course: announcements, grades, and progress."
+        title={course.name}
+        subtitle={`${course.code} • ${getTeacherName(course.teacherId)}`}
       />
 
       <Card
