@@ -73,46 +73,248 @@ const AppRoutes = () => {
         }
       >
         {/* STUDENT */}
-        <Route path="/student" element={<StudentDashboardPage />} />
-        <Route path="/lms/my-courses" element={<MyCoursesPage />} />
-        <Route path="/lms/student/courses/:courseId" element={<StudentCourseDetailPage />} />
-        <Route path="/lms/assessments" element={<AssessmentsPage />} />
-        <Route path="/lms/assessments/:assessmentId/take" element={<StudentTakeAssessmentPage />} />
-        <Route path="/lms/attendance" element={<AttendancePage />} />
-        <Route path="/lms/participation" element={<ParticipationPage />} />
-        <Route path="/lms/student-profile" element={<StudentProfilePage />} />
-        <Route path="/analytics/student" element={<StudentAnalyticsPage />} />
-        <Route path="/student/practice" element={<PracticeAndLearnPage />} />
-        <Route path="/ai/chat/student" element={<StudentChatbotPage />} />
+        <Route
+          path="/student"
+          element={<ProtectedRoute roles={['STUDENT']}><StudentDashboardPage /></ProtectedRoute>}
+        />
+        <Route
+          path="/lms/my-courses"
+          element={<ProtectedRoute roles={['STUDENT']}><MyCoursesPage /></ProtectedRoute>}
+        />
+        <Route
+          path="/lms/student/courses/:courseId"
+          element={
+            <ProtectedRoute roles={['STUDENT']}>
+              <StudentCourseDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/lms/assessments"
+          element={<ProtectedRoute roles={['STUDENT']}><AssessmentsPage /></ProtectedRoute>}
+        />
+        <Route
+          path="/lms/assessments/:assessmentId/take"
+          element={
+            <ProtectedRoute roles={['STUDENT']}>
+              <StudentTakeAssessmentPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/lms/attendance"
+          element={<ProtectedRoute roles={['STUDENT']}><AttendancePage /></ProtectedRoute>}
+        />
+        <Route
+          path="/lms/participation"
+          element={<ProtectedRoute roles={['STUDENT']}><ParticipationPage /></ProtectedRoute>}
+        />
+        <Route
+          path="/lms/student-profile"
+          element={<ProtectedRoute roles={['STUDENT']}><StudentProfilePage /></ProtectedRoute>}
+        />
+        <Route
+          path="/analytics/student"
+          element={<ProtectedRoute roles={['STUDENT']}><StudentAnalyticsPage /></ProtectedRoute>}
+        />
+        <Route
+          path="/student/practice"
+          element={<ProtectedRoute roles={['STUDENT']}><PracticeAndLearnPage /></ProtectedRoute>}
+        />
+        <Route
+          path="/ai/chat/student"
+          element={<ProtectedRoute roles={['STUDENT']}><StudentChatbotPage /></ProtectedRoute>}
+        />
 
         {/* TEACHER */}
-        <Route path="/teacher" element={<TeacherDashboardPage />} />
-        <Route path="/lms/courses" element={<CoursesPage />} />
-        <Route path="/lms/courses/:courseId" element={<CourseDetailPage />} />
-        <Route path="/lms/courses/:courseId/gradebook" element={<GradebookPage />} />
-        <Route path="/lms/teacher-attendance" element={<TeacherAttendancePage />} />
-        <Route path="/lms/teacher-participation" element={<TeacherParticipationPage />} />
-        <Route path="/lms/assessments/:assessmentId" element={<AssessmentDetailPage />} />
-        <Route path="/analytics/class" element={<ClassAnalyticsPage />} />
-        <Route path="/ai/chat/teacher" element={<TeacherChatbotPage />} />
-        <Route path="/ai/questions" element={<QuestionGeneratorPage />} />
-        <Route path="/ai/grading" element={<AIGradingPage />} />
+        <Route
+          path="/teacher"
+          element={
+            <ProtectedRoute roles={['TEACHER', 'ADMIN', 'SUPER_ADMIN']}>
+              <TeacherDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/lms/courses"
+          element={
+            <ProtectedRoute roles={['TEACHER', 'ADMIN', 'SUPER_ADMIN']}>
+              <CoursesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/lms/courses/:courseId"
+          element={
+            <ProtectedRoute roles={['TEACHER', 'ADMIN', 'SUPER_ADMIN']}>
+              <CourseDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/lms/courses/:courseId/gradebook"
+          element={
+            <ProtectedRoute roles={['TEACHER', 'ADMIN', 'SUPER_ADMIN']}>
+              <GradebookPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/lms/teacher-attendance"
+          element={
+            <ProtectedRoute roles={['TEACHER', 'ADMIN', 'SUPER_ADMIN']}>
+              <TeacherAttendancePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/lms/teacher-participation"
+          element={
+            <ProtectedRoute roles={['TEACHER', 'ADMIN', 'SUPER_ADMIN']}>
+              <TeacherParticipationPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/lms/assessments/:assessmentId"
+          element={
+            <ProtectedRoute roles={['TEACHER', 'ADMIN', 'SUPER_ADMIN']}>
+              <AssessmentDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics/class"
+          element={
+            <ProtectedRoute roles={['TEACHER', 'ADMIN', 'SUPER_ADMIN']}>
+              <ClassAnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ai/chat/teacher"
+          element={
+            <ProtectedRoute roles={['TEACHER', 'ADMIN', 'SUPER_ADMIN']}>
+              <TeacherChatbotPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ai/questions"
+          element={
+            <ProtectedRoute roles={['TEACHER', 'ADMIN', 'SUPER_ADMIN']}>
+              <QuestionGeneratorPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ai/grading"
+          element={
+            <ProtectedRoute roles={['TEACHER', 'ADMIN', 'SUPER_ADMIN']}>
+              <AIGradingPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* ADMIN */}
-        <Route path="/admin" element={<AdminDashboardPage />} />
-        <Route path="/analytics/division" element={<DivisionAnalyticsPage />} />
-        <Route path="/ai/chat/admin" element={<AdminChatbotPage />} />
-        <Route path="/ai/what-if" element={<WhatIfEnginePage />} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute roles={['ADMIN', 'SUPER_ADMIN']}>
+              <AdminDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics/division"
+          element={
+            <ProtectedRoute roles={['ADMIN', 'SUPER_ADMIN']}>
+              <DivisionAnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ai/chat/admin"
+          element={
+            <ProtectedRoute roles={['ADMIN', 'SUPER_ADMIN']}>
+              <AdminChatbotPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ai/what-if"
+          element={
+            <ProtectedRoute roles={['ADMIN', 'SUPER_ADMIN']}>
+              <WhatIfEnginePage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* SUPER ADMIN */}
-        <Route path="/superadmin" element={<SuperAdminDashboardPage />} />
-        <Route path="/analytics/school" element={<SchoolAnalyticsPage />} />
-        <Route path="/governance/modules" element={<AIModuleStatePage />} />
-        <Route path="/governance/overrides" element={<AIOverrideLogPage />} />
-        <Route path="/governance/incidents" element={<AIIncidentsPage />} />
-        <Route path="/governance/calibration" element={<AICalibrationRunsPage />} />
-        <Route path="/governance/monitoring" element={<AIMonitoringSnapshotsPage />} />
-        <Route path="/ai/chat/superadmin" element={<SuperAdminChatbotPage />} />
+        <Route
+          path="/superadmin"
+          element={
+            <ProtectedRoute roles={['SUPER_ADMIN']}>
+              <SuperAdminDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics/school"
+          element={
+            <ProtectedRoute roles={['SUPER_ADMIN']}>
+              <SchoolAnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/governance/modules"
+          element={
+            <ProtectedRoute roles={['SUPER_ADMIN']}>
+              <AIModuleStatePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/governance/overrides"
+          element={
+            <ProtectedRoute roles={['SUPER_ADMIN']}>
+              <AIOverrideLogPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/governance/incidents"
+          element={
+            <ProtectedRoute roles={['SUPER_ADMIN']}>
+              <AIIncidentsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/governance/calibration"
+          element={
+            <ProtectedRoute roles={['SUPER_ADMIN']}>
+              <AICalibrationRunsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/governance/monitoring"
+          element={
+            <ProtectedRoute roles={['SUPER_ADMIN']}>
+              <AIMonitoringSnapshotsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ai/chat/superadmin"
+          element={
+            <ProtectedRoute roles={['SUPER_ADMIN']}>
+              <SuperAdminChatbotPage />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       {/* 404 */}

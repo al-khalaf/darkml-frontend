@@ -14,6 +14,7 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
 import { alpha } from '@mui/material/styles';
+import RoleGuard from '../../components/guards/RoleGuard';
 
 const AIGradingPage: React.FC = () => {
   const theme = useTheme();
@@ -42,11 +43,16 @@ const AIGradingPage: React.FC = () => {
     : [];
 
   return (
-    <Box>
-      <PageHeader
-        title="AI Grading"
-        subtitle="Review AI-suggested grades by assessment and override when needed."
-      />
+    <RoleGuard
+      roles={['TEACHER', 'ADMIN', 'SUPER_ADMIN']}
+      fallbackTitle="Teacher workspace only"
+      fallbackMessage="Only teachers and admins can review and override AI-assisted grading queues."
+    >
+      <Box>
+        <PageHeader
+          title="AI Grading"
+          subtitle="Review AI-suggested grades by assessment and override when needed."
+        />
 
       {/* ================================
           COURSE SELECTION
@@ -293,7 +299,8 @@ const AIGradingPage: React.FC = () => {
           </CardContent>
         </Card>
       )}
-    </Box>
+      </Box>
+    </RoleGuard>
   );
 };
 

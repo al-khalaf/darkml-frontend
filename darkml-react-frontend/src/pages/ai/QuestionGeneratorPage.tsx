@@ -18,6 +18,7 @@ import {
   DialogActions,
 } from "@mui/material";
 import PageHeader from "../../components/common/PageHeader";
+import RoleGuard from "../../components/guards/RoleGuard";
 
 interface FormValues {
   classId: string;
@@ -123,11 +124,16 @@ const QuestionGeneratorPage: React.FC = () => {
   };
 
   return (
-    <>
-      <PageHeader
-        title="AI Question Generator"
-        subtitle="Generate questions from class content, chapters, difficulty, and templates."
-      />
+    <RoleGuard
+      roles={["TEACHER", "ADMIN", "SUPER_ADMIN"]}
+      fallbackTitle="Teacher workspace only"
+      fallbackMessage="Only teachers and admins can generate assessments with AI."
+    >
+      <>
+        <PageHeader
+          title="AI Question Generator"
+          subtitle="Generate questions from class content, chapters, difficulty, and templates."
+        />
 
       {/* MAIN FORM CARD */}
       <Card variant="outlined" sx={{ mb: 3 }}>
@@ -311,7 +317,8 @@ const QuestionGeneratorPage: React.FC = () => {
           </CardContent>
         </Card>
       )}
-    </>
+      </>
+    </RoleGuard>
   );
 };
 

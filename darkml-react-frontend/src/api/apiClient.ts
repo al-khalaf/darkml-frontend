@@ -3,10 +3,16 @@ import { API_BASE_URL } from '../config/env';
 
 let getAccessToken: () => string | null = () => null;
 let refreshAuthToken: () => Promise<string | null> = async () => null;
+let handleUnauthorized: () => void = () => {};
 
-export const setAuthHandlers = (getTokenFn: any, refreshFn: any) => {
+export const setAuthHandlers = (
+  getTokenFn: () => string | null,
+  refreshFn: () => Promise<string | null>,
+  unauthorizedFn?: () => void
+) => {
   getAccessToken = getTokenFn;
   refreshAuthToken = refreshFn;
+  handleUnauthorized = unauthorizedFn ?? (() => {});
 };
 
 export const apiClient = axios.create({
@@ -26,13 +32,21 @@ apiClient.interceptors.response.use(
   async (err) => {
     const original = err.config;
 
-    if (err.response?.status === 401 && !original._retry) {
-      original._retry = true;
-      const newToken = await refreshAuthToken();
-      if (newToken) {
-        original.headers.Authorization = `Bearer ${newToken}`;
-        return apiClient(original);
+    if (err.response?.status === 401) {
+      if (!original._retry) {
+        original._retry = true;
+        const newToken = await refreshAuthToken();
+        if (newToken) {
+          original.headers.Authorization = `Bearer ${newToken}`;
+          return apiClient(original);
+        }
       }
+
+      handleUnauthorized();
+    }
+
+    if (err.response?.status === 403) {
+      handleUnauthorized();
     }
 
     return Promise.reject(err);
