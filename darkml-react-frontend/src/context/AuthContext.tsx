@@ -1,5 +1,7 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { login as apiLogin } from '../api/authApi';
+import { useNavigate } from 'react-router-dom';
+import { login as apiLogin, refreshToken as apiRefreshToken } from '../api/authApi';
+import { setAuthHandlers } from '../api/apiClient';
 
 export type UserRole = 'STUDENT' | 'TEACHER' | 'ADMIN' | 'SUPER_ADMIN';
 
@@ -17,6 +19,7 @@ interface AuthContextValue {
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  hasRole: (roles?: UserRole | UserRole[]) => boolean;
 }
 
 export const AuthContext = createContext<AuthContextValue>({
@@ -26,6 +29,7 @@ export const AuthContext = createContext<AuthContextValue>({
   login: async () => {},
   logout: () => {},
   isAuthenticated: false,
+  hasRole: () => false,
 });
 
 interface Props {
@@ -33,7 +37,13 @@ interface Props {
 }
 
 export const AuthProvider: React.FC<Props> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const navigate = useNavigate();
+
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    const stored = localStorage.getItem('dm_user');
+    return stored ? (JSON.parse(stored) as AuthUser) : null;
+  });
+
   const [accessToken, setAccessToken] = useState<string | null>(
     localStorage.getItem('dm_access_token')
   );
@@ -48,23 +58,66 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 
     if (refreshToken) localStorage.setItem('dm_refresh_token', refreshToken);
     else localStorage.removeItem('dm_refresh_token');
-  }, [accessToken, refreshToken]);
 
-  const login = useCallback(async (username: string, password: string) => {
-    const res = await apiLogin({ username, password });
+    if (user) localStorage.setItem('dm_user', JSON.stringify(user));
+    else localStorage.removeItem('dm_user');
+  }, [accessToken, refreshToken, user]);
 
-    setUser(res.user);
-    setAccessToken(res.accessToken);
-    setRefreshToken(res.refreshToken);
-  }, []);
-
-  const logout = useCallback(() => {
+  const performLogout = useCallback(() => {
     setUser(null);
     setAccessToken(null);
     setRefreshToken(null);
     localStorage.removeItem('dm_access_token');
     localStorage.removeItem('dm_refresh_token');
+    localStorage.removeItem('dm_user');
   }, []);
+
+  const logout = useCallback(() => {
+    performLogout();
+    navigate('/login');
+  }, [navigate, performLogout]);
+
+  const refreshAccessToken = useCallback(async () => {
+    if (!refreshToken) return null;
+
+    try {
+      const res = await apiRefreshToken(refreshToken);
+      setAccessToken(res.accessToken);
+      return res.accessToken;
+    } catch (error) {
+      performLogout();
+      return null;
+    }
+  }, [performLogout, refreshToken]);
+
+  const login = useCallback(
+    async (username: string, password: string) => {
+      const res = await apiLogin({ username, password });
+
+      setUser(res.user);
+      setAccessToken(res.accessToken);
+      setRefreshToken(res.refreshToken);
+    },
+    []
+  );
+
+  const hasRole = useCallback(
+    (roles?: UserRole | UserRole[]) => {
+      if (!roles) return true;
+      const required = Array.isArray(roles) ? roles : [roles];
+      return !!user && required.includes(user.role);
+    },
+    [user]
+  );
+
+  const handleUnauthorized = useCallback(() => {
+    performLogout();
+    navigate('/login', { replace: true });
+  }, [navigate, performLogout]);
+
+  useEffect(() => {
+    setAuthHandlers(() => accessToken, refreshAccessToken, handleUnauthorized);
+  }, [accessToken, refreshAccessToken, handleUnauthorized]);
 
   const value: AuthContextValue = {
     user,
@@ -73,16 +126,8 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
     login,
     logout,
     isAuthenticated: !!accessToken && !!user,
+    hasRole,
   };
-useEffect(() => {
-  if (!user) {
-    setUser({
-      id: '1',
-      name: 'Ibrahim Al Mubarak',
-      role: 'TEACHER',
-    });
-  }
-}, [user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
