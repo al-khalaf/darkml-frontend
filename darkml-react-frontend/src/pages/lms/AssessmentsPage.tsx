@@ -10,30 +10,116 @@ import {
   Stack,
   useTheme,
   alpha,
+  CircularProgress,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import { Link as RouterLink } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
+import { useSubmitAssessment } from '../../hooks/useLmsMutations';
+import { useToast } from '../../hooks/useToast';
+
+type DashboardAssessment = {
+  id: string;
+  title: string;
+  course: string;
+  dueDate: string;
+  status: 'UPCOMING' | 'IN_PROGRESS' | 'COMPLETED';
+  score?: string;
+};
 
 const AssessmentsPage: React.FC = () => {
   const theme = useTheme();
+  const { showToast, toast } = useToast();
+  const submitMutation = useSubmitAssessment();
 
-  const upcoming = [
-    { id: 'a1', title: 'Algebra Quiz 3', course: 'Algebra I', dueDate: '2025-11-26' },
-  ];
+  const [startingId, setStartingId] = React.useState<string | null>(null);
+  const [submittingId, setSubmittingId] = React.useState<string | null>(null);
 
-  const current = [
-    { id: 'a2', title: 'History Essay', course: 'World History', dueDate: '2025-11-24' },
-  ];
+  const [upcoming, setUpcoming] = React.useState<DashboardAssessment[]>([
+    {
+      id: 'a1',
+      title: 'Algebra Quiz 3',
+      course: 'Algebra I',
+      dueDate: '2025-11-26',
+      status: 'UPCOMING',
+    },
+  ]);
 
-  const past = [
-    { id: 'a3', title: 'Biology Quiz 1', course: 'Biology', score: '18/20' },
-  ];
+  const [current, setCurrent] = React.useState<DashboardAssessment[]>([
+    {
+      id: 'a2',
+      title: 'History Essay',
+      course: 'World History',
+      dueDate: '2025-11-24',
+      status: 'IN_PROGRESS',
+    },
+  ]);
+
+  const [past, setPast] = React.useState<DashboardAssessment[]>([
+    {
+      id: 'a3',
+      title: 'Biology Quiz 1',
+      course: 'Biology',
+      score: '18/20',
+      dueDate: '2025-11-18',
+      status: 'COMPLETED',
+    },
+  ]);
 
   const borderColor = theme.palette.divider;
   const softWarning = alpha(theme.palette.warning.main, 0.12);
   const softSuccess = alpha(theme.palette.success.main, 0.12);
   const softPrimary = alpha(theme.palette.primary.main, 0.08);
+
+  const handleStart = (assessment: DashboardAssessment) => {
+    const previousUpcoming = [...upcoming];
+    const previousCurrent = [...current];
+    setStartingId(assessment.id);
+    setUpcoming((prev) => prev.filter((a) => a.id !== assessment.id));
+    setCurrent((prev) => [...prev, { ...assessment, status: 'IN_PROGRESS' }]);
+
+    submitMutation.mutate(
+      { assessmentId: assessment.id, studentId: 'student-123' },
+      {
+        onSuccess: () => {
+          showToast('Assessment unlocked and ready to start.', 'success');
+        },
+        onError: () => {
+          setUpcoming(previousUpcoming);
+          setCurrent(previousCurrent);
+          showToast('Unable to start assessment right now.', 'error');
+        },
+        onSettled: () => setStartingId(null),
+      }
+    );
+  };
+
+  const handleSubmit = (assessment: DashboardAssessment) => {
+    const previousCurrent = [...current];
+    const previousPast = [...past];
+    setSubmittingId(assessment.id);
+    setCurrent((prev) => prev.filter((a) => a.id !== assessment.id));
+    setPast((prev) => [
+      { ...assessment, status: 'COMPLETED', score: assessment.score ?? 'Pending review' },
+      ...prev,
+    ]);
+
+    submitMutation.mutate(
+      {
+        assessmentId: assessment.id,
+        studentId: 'student-123',
+        answers: { auto: 'submitted-from-dashboard' },
+      },
+      {
+        onSuccess: () => showToast('Submission received.', 'success'),
+        onError: () => {
+          setCurrent(previousCurrent);
+          setPast(previousPast);
+          showToast('Submission failed. Try again.', 'error');
+        },
+        onSettled: () => setSubmittingId(null),
+      }
+    );
+  };
 
   return (
     <>
@@ -116,11 +202,16 @@ const AssessmentsPage: React.FC = () => {
                     <Button
                       size="small"
                       variant="contained"
-                      component={RouterLink}
-                      to={`/lms/assessments/${a.id}/take`}
+                      disabled={startingId === a.id}
+                      onClick={() => handleStart(a)}
+                      startIcon={
+                        startingId === a.id ? (
+                          <CircularProgress color="inherit" size={16} />
+                        ) : undefined
+                      }
                       sx={{ whiteSpace: 'nowrap' }}
                     >
-                      Go
+                      {startingId === a.id ? 'Starting...' : 'Go'}
                     </Button>
                   </Box>
                 ))}
@@ -203,11 +294,16 @@ const AssessmentsPage: React.FC = () => {
                       size="small"
                       variant="contained"
                       color="success"
-                      component={RouterLink}
-                      to={`/lms/assessments/${a.id}/take`}
+                      disabled={submittingId === a.id}
+                      onClick={() => handleSubmit(a)}
+                      startIcon={
+                        submittingId === a.id ? (
+                          <CircularProgress color="inherit" size={16} />
+                        ) : undefined
+                      }
                       sx={{ whiteSpace: 'nowrap' }}
                     >
-                      Continue
+                      {submittingId === a.id ? 'Submitting...' : 'Submit'}
                     </Button>
                   </Box>
                 ))}
@@ -286,6 +382,7 @@ const AssessmentsPage: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
+      {toast}
     </>
   );
 };
