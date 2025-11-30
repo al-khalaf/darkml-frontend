@@ -52,8 +52,11 @@ import AIMonitoringSnapshotsPage from '../pages/governance/AIMonitoringSnapshots
 
 // ERRORS
 import NotFoundPage from '../pages/errors/NotFoundPage';
+import LmsErrorBoundary from '../components/errors/LmsErrorBoundary';
 
 const AppRoutes = () => {
+  const wrapLms = (element: JSX.Element) => <LmsErrorBoundary>{element}</LmsErrorBoundary>;
+
   return (
     <Routes>
       {/* Redirect root to login */}
@@ -74,25 +77,31 @@ const AppRoutes = () => {
       >
         {/* STUDENT */}
         <Route path="/student" element={<StudentDashboardPage />} />
-        <Route path="/lms/my-courses" element={<MyCoursesPage />} />
-        <Route path="/lms/student/courses/:courseId" element={<StudentCourseDetailPage />} />
-        <Route path="/lms/assessments" element={<AssessmentsPage />} />
-        <Route path="/lms/assessments/:assessmentId/take" element={<StudentTakeAssessmentPage />} />
-        <Route path="/lms/attendance" element={<AttendancePage />} />
-        <Route path="/lms/participation" element={<ParticipationPage />} />
-        <Route path="/lms/student-profile" element={<StudentProfilePage />} />
+        <Route path="/lms/my-courses" element={wrapLms(<MyCoursesPage />)} />
+        <Route
+          path="/lms/student/courses/:courseId"
+          element={wrapLms(<StudentCourseDetailPage />)}
+        />
+        <Route path="/lms/assessments" element={wrapLms(<AssessmentsPage />)} />
+        <Route
+          path="/lms/assessments/:assessmentId/take"
+          element={wrapLms(<StudentTakeAssessmentPage />)}
+        />
+        <Route path="/lms/attendance" element={wrapLms(<AttendancePage />)} />
+        <Route path="/lms/participation" element={wrapLms(<ParticipationPage />)} />
+        <Route path="/lms/student-profile" element={wrapLms(<StudentProfilePage />)} />
         <Route path="/analytics/student" element={<StudentAnalyticsPage />} />
-        <Route path="/student/practice" element={<PracticeAndLearnPage />} />
+        <Route path="/student/practice" element={wrapLms(<PracticeAndLearnPage />)} />
         <Route path="/ai/chat/student" element={<StudentChatbotPage />} />
 
         {/* TEACHER */}
         <Route path="/teacher" element={<TeacherDashboardPage />} />
-        <Route path="/lms/courses" element={<CoursesPage />} />
-        <Route path="/lms/courses/:courseId" element={<CourseDetailPage />} />
-        <Route path="/lms/courses/:courseId/gradebook" element={<GradebookPage />} />
-        <Route path="/lms/teacher-attendance" element={<TeacherAttendancePage />} />
-        <Route path="/lms/teacher-participation" element={<TeacherParticipationPage />} />
-        <Route path="/lms/assessments/:assessmentId" element={<AssessmentDetailPage />} />
+        <Route path="/lms/courses" element={wrapLms(<CoursesPage />)} />
+        <Route path="/lms/courses/:courseId" element={wrapLms(<CourseDetailPage />)} />
+        <Route path="/lms/courses/:courseId/gradebook" element={wrapLms(<GradebookPage />)} />
+        <Route path="/lms/teacher-attendance" element={wrapLms(<TeacherAttendancePage />)} />
+        <Route path="/lms/teacher-participation" element={wrapLms(<TeacherParticipationPage />)} />
+        <Route path="/lms/assessments/:assessmentId" element={wrapLms(<AssessmentDetailPage />)} />
         <Route path="/analytics/class" element={<ClassAnalyticsPage />} />
         <Route path="/ai/chat/teacher" element={<TeacherChatbotPage />} />
         <Route path="/ai/questions" element={<QuestionGeneratorPage />} />
